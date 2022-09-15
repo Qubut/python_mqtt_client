@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "mqtt-measuring"
+version = "0.1.0"
+description = ""
+authors = ["Qubut <s-aahmed@haw-landshut.de>"]
+readme = "README.md"
+packages = [{include = "mqtt_measuring", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+paho-mqtt = "^1.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
