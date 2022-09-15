@@ -1,3 +1,4 @@
+# from _typeshed import ReadableBuffer
 from paho.mqtt.client import Client as mqtt_client
 from timing import timed
 from connect import connect_mqtt
@@ -12,10 +13,10 @@ def onMessage(client:mqtt_client, userdata,message):
     print("Recieving Message")
     print(message.topic)
     print(message.payload)
-    savePayload(client,message.payload,filename)
-
+    time =  savePayload(client,message.payload,filename)[1]
+    print(time)
 @timed
-def savePayload(client:mqtt_client,payload, filename):
+def savePayload(client:mqtt_client,payload, filename:str):
     print(f"Saving {filename}")
     with open(filename,"wb") as f:
         f.write(payload)

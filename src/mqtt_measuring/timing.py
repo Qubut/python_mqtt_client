@@ -1,12 +1,13 @@
 
 from types import FunctionType
 from time import time
+from typing import Any
 
 def timed(f):
-    def wrap(*args, **kargs):
-        t0 = time.time()
-        result = f(*args,**kargs)
-        t = time.time()
+    def wrap(*args, **kargs)->tuple[Any,float]:
+        t0 = time()
+        result:Any = f(*args,**kargs)
+        t = time()
         elapsed = t - t0
         return result, elapsed
     return wrap
