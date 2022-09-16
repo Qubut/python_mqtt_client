@@ -1,19 +1,23 @@
 # from _typeshed import ReadableBuffer
 from paho.mqtt.client import Client as mqtt_client
+from paho.mqtt.client import MQTTMessage
+from pandas import DataFrame
 from timing import timed
 from connect import connect_mqtt
 from argparse import ArgumentParser
 import time
-
-
+from measures import createDataFrame
 
 filename = "DUMMYFILE"
-
-def onMessage(client:mqtt_client, userdata,message):
+data:DataFrame = createDataFrame(["QoS0","QoS1","QoS2"],["time",'size'])
+def onMessage(client:mqtt_client, userdata,message:MQTTMessage):
     print("Recieving Message")
+    print(message.timestamp)
+    print(message.qos)
     print(message.topic)
-    print(message.payload)
+    # print(message.payload)
     time =  savePayload(client,message.payload,filename)[1]
+    
     print(time)
 @timed
 def savePayload(client:mqtt_client,payload, filename:str):

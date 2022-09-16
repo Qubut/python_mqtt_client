@@ -8,7 +8,7 @@ def timed(f):
         t0 = time()
         result:Any = f(*args,**kargs)
         t = time()
-        elapsed = t - t0
-        return result, elapsed
+        elapsed = (t - t0)
+        return result, elapsed*100 if elapsed < 1 else elapsed
     return wrap
 
