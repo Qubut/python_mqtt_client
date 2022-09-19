@@ -9,6 +9,6 @@ def timed(f):
         result:Any = f(*args,**kargs)
         t = time()
         elapsed = (t - t0)
-        return result, elapsed*100 if elapsed < 1 else elapsed
+        return result, elapsed if elapsed < 1 else elapsed
     return wrap
 

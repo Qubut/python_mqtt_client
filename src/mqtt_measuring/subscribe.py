@@ -6,24 +6,28 @@ from timing import timed
 from connect import connect_mqtt
 from argparse import ArgumentParser
 import time
-from measures import createDataFrame
-
+from utils import getFileSize
 filename = "DUMMYFILE"
-data:DataFrame = createDataFrame(["QoS0","QoS1","QoS2"],["time",'size'])
+data = {
+        'time elapsed':[],
+        'file sizes':[]
+        }
+df = DataFrame()
 def onMessage(client:mqtt_client, userdata,message:MQTTMessage):
     print("Recieving Message")
-    print(message.timestamp)
-    print(message.qos)
     print(message.topic)
-    # print(message.payload)
     time =  savePayload(client,message.payload,filename)[1]
+    data["time elapsed"].append(time)
+    df = DataFrame(data)
+    df.to_csv('./results.csv')
+    print(data)
     
-    print(time)
 @timed
 def savePayload(client:mqtt_client,payload, filename:str):
     print(f"Saving {filename}")
     with open(filename,"wb") as f:
         f.write(payload)
+    data["file sizes"].append(getFileSize(filename))
 
 def subscribe(client:mqtt_client,topic):
     client.subscribe(topic)

@@ -9,6 +9,9 @@ packages = [{include = "mqtt_measuring", from = "src"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 paho-mqtt = "^1.6.1"
+typeshed-client = "^2.0.5"
+pandas = "^1.4.4"
+matplotlib = "^3.5.3"
 
 
 [build-system]
