@@ -1,4 +1,5 @@
 import base64
+from email.policy import default
 import threading
 from time import time
 from connect import connect_mqtt
@@ -117,12 +118,12 @@ def run(qos: int, topic: str, message: str, file: str, retain: bool):
 
 @click.command()
 @click.option("--qos", "-q", default=0, type=click.Choice([0, 1, 2]), help="defines the QoS")
-@click.option("--topic", "-t", type=str, help="sets the message's topic")
+@click.option("--topic", "-t",type=str, help="sets the message's topic")
 @click.option("--message", "-m", default=None, type=str, help="message to be sent to the subscribers")
 @click.option("--file", "-f", default=None, type=str, help="file to be sent to the subscribers")
 @click.option("--retain", "-r", default=False, type=click.Choice([True, False]), help="""if set to True, 
               the will message will be set as the “last known good”/retained message for the topic""")
-def main(qos, topic, message, file, retain):
+def main(topic,message, file,qos, retain):
     if file and not check_file(file):
         logging.error("no file", file)
         return 1
