@@ -1,10 +1,17 @@
-from argparse import ArgumentParser
-parser = ArgumentParser()
-parser.add_argument('size')
-parser.add_argument('path')
-args = parser.parse_args()._get_kwargs()
-size:int = args[0][1]
-path:str = args[1][1]
-with open(path, "wb") as out:
-    out.seek(size-1)
-    out.write(b'\x00')
+import click
+import logging
+
+
+@click.command()
+@click.option("--path","-p", default="./out/DUMMYFILE", type=str, help="path of the file")
+@click.option("--size","-s", default=1024*1024, type=int, help="size of the file to be created")
+def main(path: str, size: int):
+    try:
+        with open(path, "wb") as out:
+            out.seek(size-1)
+            out.write(b'\x00')
+    except FileNotFoundError as e:
+        logging.error(e)        
+
+if __name__ == "__main__":
+    main()

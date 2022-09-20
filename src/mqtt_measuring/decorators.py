@@ -1,4 +1,3 @@
-
 from types import FunctionType
 from time import time
 from typing import Any
@@ -11,4 +10,3 @@ def timed(f):
         elapsed = (t - t0)
         return result, elapsed if elapsed < 1 else elapsed
     return wrap
-
