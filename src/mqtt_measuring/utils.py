@@ -5,24 +5,31 @@ import asyncio
 from hashlib import md5
 from json import dumps, loads
 
-get_size = lambda fpath: int(os.path.getsize(fpath)/1024)
+
+def get_size(fpath):
+    return int(os.path.getsize(fpath)/1024)
 
 
+def dump_json(msg): return dumps(msg)
+def load_json(msg): return loads(msg)
+def chunk_md5(chunk): return md5(chunk).hexdigest()
 
-dump_json = lambda msg: dumps(msg)
-load_json = lambda msg: loads(msg)
-chunk_md5 = lambda chunk: md5(chunk).hexdigest()
 
-check_file = lambda f: os.path.isfile(f)
+def check_file(f):
+    return os.path.isfile(f)
 
-check_path = lambda path: os.path.exists(path)
 
-mk_dir = lambda dir: os.makedirs(dir)
+def check_path(path): return os.path.exists(path)
 
-def exit(err): 
-    os._exit(err) 
+
+def mk_dir(dir): return os.makedirs(dir)
+
+
+def exit(err):
+    os._exit(err)
     os.kill(os.getpid)
-    
+
+
 def generate_md5(fname):
     hash_md5 = md5()
     with open(fname, "rb") as f:
@@ -30,7 +37,8 @@ def generate_md5(fname):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
-def check_temp_files(od,filename, timeid, filehash):
+
+def check_temp_files(od, filename, timeid, filehash):
     """ check temp file and rename to original
     """
     os.sync()

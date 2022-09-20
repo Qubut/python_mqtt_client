@@ -9,6 +9,10 @@ import _thread
 import logging
 from connect import connect_mqtt
 from utils import check_path, mk_dir, check_temp_files, exit, dump_json, chunk_md5, load_json
+
+
+
+logging.basicConfig(level=logging.INFO)
 data = {
     'time elapsed': [],
     'file sizes': []

@@ -8,13 +8,13 @@ import asyncio
 from paho.mqtt.client import Client as mqtt_client
 import click
 import time
-from utils import check_file, chunk_md5, load_json
+from utils import check_file, chunk_md5, load_json,dump_json
 from utils import exit, generate_md5, get_size, chunk_md5
 CHUNKSIZE = 999
 chunknumber = 0
 lock = threading.Lock()
 
-
+logging.basicConfig(level=logging.INFO)
 def publish(client: mqtt_client, qos: int, topic: str, message: str, retain: bool):
     result = client.publish(topic, message, qos, retain)
     time.sleep(0.1)
@@ -52,8 +52,8 @@ def send_file(client, topic, file, qos, retain):
                     "chunknumber": chunknumber,
                     "chunkhash": chunk_md5(data),
                     "chunksize": len(chunk)})
-                client.publish(topic, payload, qos, retain)
-                lock.acquire()
+                client.publish(topic,dump_json(payload), qos, retain)
+                # lock.acquire()
                 chunknumber += 1
             else:
                 del payload["chunknumber"]
@@ -62,7 +62,7 @@ def send_file(client, topic, file, qos, retain):
                 del payload["chunksize"]
                 payload.update({"end": True})
                 logging.info("END transfer file:", file)
-                client.publish(topic, payload, qos, retain)
+                client.publish(topic,dump_json(payload), qos, retain)
                 break
     time.sleep(0.2)
     exit(0)
@@ -89,12 +89,12 @@ def confirm_and_release(top, msg):
     except Exception as e:
         logging.error("json2msg", e)
         exit(2)
-    try:
-        if j["chunknumber"] == chunknumber:
-            lock.release()
-    except Exception as e:
-        logging.error(e)
-        exit(3)
+    # try:
+        # if j["chunknumber"] == chunknumber:
+            # lock.release()
+    # except Exception as e:
+        # logging.error(e)
+        # exit(3)
 
 
 def on_message(client, userdata, msg):
@@ -109,18 +109,19 @@ def run(qos: int, topic: str, message: str, file: str, retain: bool):
     client.subscribe(f"{topic}/status")
     client.enable_logger(logging.Logger("Mqtt Logger"))
     if file:
-        publish_thread = threading.Thread(target=send_file, args=(client,topic,file,qos,retain))
-        publish_thread.daemon = True
-        publish_thread.start()
+        send_file(client,topic,file,qos,retain)
+        # publish_thread = threading.Thread(target=send_file, args=(client,topic,file,qos,retain))
+        # publish_thread.daemon = True
+        # publish_thread.start()
     client.loop_start()
     publish(client, qos, topic, message,retain)
 
 
 @click.command()
 @click.option("--qos", "-q", default=0, type=click.Choice([0, 1, 2]), help="defines the QoS")
-@click.option("--topic", "-t",type=str, help="sets the message's topic")
+@click.option("--topic", "-t",default="/home/file",type=str, help="sets the message's topic")
 @click.option("--message", "-m", default=None, type=str, help="message to be sent to the subscribers")
-@click.option("--file", "-f", default=None, type=str, help="file to be sent to the subscribers")
+@click.option("--file", "-f", default="./resources/DUMMYFILE", type=str, help="file to be sent to the subscribers")
 @click.option("--retain", "-r", default=False, type=click.Choice([True, False]), help="""if set to True, 
               the will message will be set as the “last known good”/retained message for the topic""")
 def main(topic,message, file,qos, retain):
