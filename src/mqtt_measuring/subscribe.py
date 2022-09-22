@@ -7,9 +7,8 @@ from paho.mqtt.client import MQTTMessage
 from pandas import DataFrame
 import _thread
 import logging
-from connect import connect_mqtt
+from mqtt_client import MqttClient
 from utils import check_path, mk_dir, check_temp_files, exit, dump_json, chunk_md5, load_json
-
 
 
 logging.basicConfig(level=logging.INFO)
@@ -90,13 +89,12 @@ def subscribe(client: mqtt_client, topic):
 
 
 def run(topic: str):
-    client = connect_mqtt()
-    subscribe(client, topic)
-    client.loop_forever()
-
-
+    el = MqttClient()
+    el.connect()
+    subscribe(el.client, topic)
+    el.client.loop_forever()
 @click.command()
-@click.option("--topic", "-t", type=str, help="sets the message's topic")
+@click.option("--topic", "-t",default="/home/file", type=str, help="sets the message's topic")
 @click.option("--output-dir", "-od", default="./out", type=str, help="Directory of transmitted files")
 def main(topic, output_dir):
     od = output_dir

@@ -2,8 +2,8 @@ import base64
 from email.policy import default
 import threading
 from time import time
-from connect import connect_mqtt
-import logging
+from mqtt_client import MqttClient
+from .logger import logger
 import asyncio
 from paho.mqtt.client import Client as mqtt_client
 import click
@@ -14,15 +14,14 @@ CHUNKSIZE = 999
 chunknumber = 0
 lock = threading.Lock()
 
-logging.basicConfig(level=logging.INFO)
 def publish(client: mqtt_client, qos: int, topic: str, message: str, retain: bool):
     result = client.publish(topic, message, qos, retain)
     time.sleep(0.1)
     status = result[0]  # result: [0, 1]
     if status == 0:
-        logging.info(f"Send `{message}` to topic `{topic}`")
+        logger.info(f"Send `{message}` to topic `{topic}`")
     else:
-        logging.info(f"Failed to send message to topic {topic}")
+        logger.info(f"Failed to send message to topic {topic}")
 
 
 def send_file(client, topic, file, qos, retain):
@@ -61,7 +60,7 @@ def send_file(client, topic, file, qos, retain):
                 del payload["chunkhash"]
                 del payload["chunksize"]
                 payload.update({"end": True})
-                logging.info("END transfer file:", file)
+                logger.info("END transfer file:", file)
                 client.publish(topic,dump_json(payload), qos, retain)
                 break
     time.sleep(0.2)
@@ -76,7 +75,7 @@ def publish_file(client, topic, payload, qos, retain):
                 "send chunk:", payload["chunknumber"], "time:",
                 int(time.time()-float(payload["timeid"])), "sec")
     except Exception as e:
-        logging.error(e)
+        logger.error(e)
 
 
 def confirm_and_release(top, msg):
@@ -87,13 +86,13 @@ def confirm_and_release(top, msg):
     try:
         j = load_json(msg.decode())
     except Exception as e:
-        logging.error("json2msg", e)
+        logger.error("json2msg", e)
         exit(2)
     # try:
         # if j["chunknumber"] == chunknumber:
             # lock.release()
     # except Exception as e:
-        # logging.error(e)
+        # logger.error(e)
         # exit(3)
 
 
@@ -105,16 +104,17 @@ def on_message(client, userdata, msg):
 
 
 def run(qos: int, topic: str, message: str, file: str, retain: bool):
-    client = connect_mqtt()
-    client.subscribe(f"{topic}/status")
-    client.enable_logger(logging.Logger("Mqtt Logger"))
+    el = MqttClient()
+    el.connect()
+    el.subscribe(f"{topic}/status")
+    el.enable_logger(logger.Logger("Mqtt Logger"))
     if file:
-        send_file(client,topic,file,qos,retain)
+        send_file(el.client,topic,file,qos,retain)
         # publish_thread = threading.Thread(target=send_file, args=(client,topic,file,qos,retain))
         # publish_thread.daemon = True
         # publish_thread.start()
-    client.loop_start()
-    publish(client, qos, topic, message,retain)
+    el.loop_start()
+    publish(el.client, qos, topic, message,retain)
 
 
 @click.command()
@@ -126,10 +126,10 @@ def run(qos: int, topic: str, message: str, file: str, retain: bool):
               the will message will be set as the “last known good”/retained message for the topic""")
 def main(topic,message, file,qos, retain):
     if file and not check_file(file):
-        logging.error("no file", file)
+        logger.error("no file", file)
         return 1
     elif file:
-        logging.info(
+        logger.info(
             f"starting the transfer of file {file}  chunksize = {CHUNKSIZE} byte")
     run(qos, topic, message, file, retain)
 

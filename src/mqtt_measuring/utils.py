@@ -3,23 +3,14 @@ import logging
 import os.path
 from hashlib import md5
 from json import dumps, loads
-
+from .logger import logger
 """
 This is a module containing 
 the functions used by both publish.py and subscribe.py
     
 """
 
-def get_size(fpath: str) -> int:
-    """returns the size of the given file
 
-    Args:
-        fpath (str): the full or relative path of the file
-
-    Returns:
-        int: the size of the file in KB 
-    """
-    return int(os.path.getsize(fpath)/1024)
 
 
 def dump_json(msg: bytes) -> str:
@@ -81,7 +72,19 @@ def check_path(path: str) -> bool:
         bool: the result for the checking the path
     """
     return os.path.exists(path)
+def get_size(fpath: str) -> int:
+    """returns the size of the given file
 
+    Args:
+        fpath (str): the full or relative path of the file
+
+    Returns:
+        int: the size of the file in KB 
+    """
+    if check_file(fpath):
+        return int(os.path.getsize(fpath)/1024)
+    else:
+        raise FileNotFoundError
 
 def mk_dir(dir: str):
     """makes a dir in the given path
@@ -92,6 +95,9 @@ def mk_dir(dir: str):
     Returns:
         None
     """
+    if check_path(dir):
+        logger.info(f"Directory {dir} already exits")
+        return
     os.makedirs(dir)
 
 

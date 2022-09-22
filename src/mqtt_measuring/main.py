@@ -1,13 +1,14 @@
 from ast import parse
-import imp
+from mqtt_client import MqttClient
 import subscribe
 import publish
-from argparse import ArgumentParser
+import click
 
 def main():
-    parser = ArgumentParser()
-    parser.add_argument("--publish")
-    parser.add_argument("--subscribe")
+    el = MqttClient()
+    el.connect()
+    subscribe(el.client, topic)
+    el.client.loop_forever()
 
 if __name__=="__main__":
     main()
