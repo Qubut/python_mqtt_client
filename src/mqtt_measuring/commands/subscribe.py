@@ -15,7 +15,7 @@ def run(topic: str, qos: int, od: str):
 @click.option("--topic", "-t", default="/home/file", type=str, help="sets the message's topic")
 @click.option("--qos", "-q", default='0', type=click.Choice(['0', '1', '2']), help="defines the QoS")
 @click.option("--output-dir", "-od", type=str, help="Directory of transmitted files")
-def main(topic, qos, output_dir):
+def subscribe(topic, qos, output_dir):
     od = output_dir
     if not check_path(od):
         try:
@@ -27,4 +27,4 @@ def main(topic, qos, output_dir):
 
 
 if __name__ == '__main__':
-    main()
+    subscribe()

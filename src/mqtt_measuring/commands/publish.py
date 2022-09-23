@@ -25,14 +25,14 @@ def run(qos: int, topic: str, message: str, file: str, retain: bool, chunk_size)
 @click.option("--qos", "-q", default='0', type=click.Choice(['0', '1', '2']), help="defines the QoS")
 @click.option("--topic", "-t", default="/home/file", type=str, help="sets the message's topic")
 @click.option("--message", "-m", default=None, type=str, help="message to be sent to the subscribers")
-@click.option("--file", "-f", type=str, help="file to be sent to the subscribers")
-@click.option("--retain", "-r", default=False, type=click.Choice([True, False]), help="""if set to True, 
+@click.option("--file", "-f", type=click.Path(exists=1,readable=1), help="file to be sent to the subscribers")
+@click.option("--retain", "-r", default=False, type=bool, help="""if set to True, 
               the will message will be set as the “last known good”/retained message for the topic""")
-@click.option("--chunk-size", "-cs", default="1024", type=str, help="sets the message's topic")
-def main(topic, message, file, qos, retain, chunk_size):
-    if file and not check_file(file):
-        logger.error("no file", file)
-        return 1
+@click.option("--chunk-size", "-cs", default="1024", type=str, help="""sets the chunk size of the file 
+                                                                    per payload""")
+def publish(topic, message, file, qos, retain, chunk_size):
+    if not file and not message:
+        raise click.MissingParameter('No message or file were provided')
     elif file:
         logger.info(
             f"starting the transfer of file {file}  chunksize = {chunk_size} byte")
@@ -40,4 +40,4 @@ def main(topic, message, file, qos, retain, chunk_size):
 
 
 if __name__ == '__main__':
-    main()
+    publish()
