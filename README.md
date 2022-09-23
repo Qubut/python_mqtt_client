@@ -7,9 +7,9 @@ build upon the python pkg **paho_mqtt**
 To use the project, first follow the guide [installation guid](https://python-poetry.org/docs/#installation) to install poetry 
 which is the dependency manager and packager 
 
-after that you initialize the project
+after than intall the project's dependencies
 ```hs
-poetry init
+poetry install
 ```
 if you wanna add further pkgs use
 
@@ -22,5 +22,18 @@ runnig a dedicated shell env is done through:
 poetry shell
 ```
 ---
-there are 3 scripts `subscribe, publish and create_dummy`
-use for example `subscribe --help` to get an idea about each one's options
+go to `./easy_mqtt`: `cd ./easy_mqtt`
+
+run a `venv` if you want `poetry shell`
+
+install the application through pip: `pip install --editable .`
+
+then you can use it through `easymqtt` in terminal
+
+there two commands:
+
+`easymqtt subscribe`
+
+`easymqtt publish`
+
+use the `--help` flag to see more details
