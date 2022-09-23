@@ -28,6 +28,3 @@ def subscribe(topic, qos, output_dir):
             return 1
     run(topic, int(qos), output_dir)
 
-
-if __name__ == '__main__':
-    subscribe()

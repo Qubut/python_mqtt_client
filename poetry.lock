@@ -296,7 +296,7 @@ importlib-resources = ">=1.4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "3d1d02302001a4200004c8e6a96a9529b563a4b3a6f14afa98418ff867f7703f"
+content-hash = "5aa25816a794d07c3ee46a8930c63831326494fdf518a705c5a7edb94a0bbc15"
 
 [metadata.files]
 attrs = [

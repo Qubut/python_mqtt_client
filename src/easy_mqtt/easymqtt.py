@@ -9,5 +9,3 @@ def easy_mqtt():
 
 easy_mqtt.add_command(publish.publish)
 easy_mqtt.add_command(subscribe.subscribe)
-if __name__ == "__main__":
-    easy_mqtt()

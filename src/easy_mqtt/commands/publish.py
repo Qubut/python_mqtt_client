@@ -35,7 +35,3 @@ def publish(topic, message, file, qos, retain, chunk_size):
         logger.info(
             f"starting the transfer of file {file}  chunksize = {chunk_size} byte")
     run(topic, message, qos, retain,  file, chunk_size)
-
-
-if __name__ == '__main__':
-    publish()
