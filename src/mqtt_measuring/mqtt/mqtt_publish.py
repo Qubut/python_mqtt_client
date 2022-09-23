@@ -1,10 +1,9 @@
-from utils import exit, generate_md5, chunk_md5
+from utils import logger, exit, generate_md5, chunk_md5
 import base64
 from paho.mqtt.client import Client, MQTTMessage
 from genericpath import getsize
 import time
-from utils import logger
-from mqtt_client import MqttClient
+from .mqtt_client import MqttClient
 import json
 import threading
 
@@ -39,12 +38,13 @@ class MqttPublish(MqttClient):
         try:
             if j["chunknumber"] == cls.chunk_number:
                 cls.lock.release()
+                logger.debug("releasing lock")
         except Exception as e:
             logger.error(e)
             exit(3)
 
     @classmethod
-    def send_file(cls, client, topic, file, qos, retain):
+    def send_file(cls, client, topic, qos, retain, file):
         """ split, send chunk and wait for lock release
         """
         timeid = str(int(time.time()))
@@ -79,9 +79,10 @@ class MqttPublish(MqttClient):
                     del payload["chunkhash"]
                     del payload["chunksize"]
                     payload.update({"end": True})
-                    logger.info(f"END transfer file: {file}")
                     cls.publish_file(
                         client, topic, json.dumps(payload), qos, retain)
+                    logger.info(f"END transfer file: {file}")
+                    time.sleep(1)
                     break
         exit(0)
 
