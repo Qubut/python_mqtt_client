@@ -1,4 +1,3 @@
-from ast import parse
 from mqtt_client import MqttClient
 import subscribe
 import publish

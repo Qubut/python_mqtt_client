@@ -1,11 +1,13 @@
 from paho.mqtt.client import Client
 from os import environ
-from .logger import logger
+from utils import logger
 
 
 class MqttClient:
 
-    def __init__(self, client_id: str | None = None):
+    def __init__(self, topic: str, qos: int = 0, client_id: str | None = None,):
+        self.topic = topic
+        self.qos = qos
         if client_id := environ.get('MQTT_CLIENT_ID'):
             self.client = Client(client_id)
 
@@ -16,19 +18,11 @@ class MqttClient:
         else:
             logger.warning(
                 """No credentials were provided""")
-
-    def connect(self):
         if (broker := environ.get('MQTT_BROKER')) and (port := environ.get('MQTT_PORT')):
             self.client.connect(broker, int(port))
         else:
             logger.warning("""Broker's IP and Port weren't provided
                         Using default: localhost:1883""")
-            self.client.on_connect = self.on_connect
-            self.client.connect_async("localhost", 1883)
-
-    def on_connect(self, client: Client, userdata, flags, rc):
-        if rc == 0:
-            logger.info("Connected to MQTT Broker!")
-            print(client.is_connected())
-        else:
-            logger.error(f"Failed to connect, return code {rc}")
+            self.client.connect('localhost',1883)
+            self.client.on_connect = lambda client, userdata, flags, rc: logger.info(
+                "Connected to MQTT Broker!") if rc == 0 else logger.error(f"Failed to connect, return code {rc}")

@@ -4,13 +4,15 @@ import pytest
 import asyncio
 
 
-# class TestMqttClient():
-# @pytest.fixture()
-# def client() -> MqttClient:
-#     cl = MqttClient()
-#     cl.connect()
-#     return cl.client
+class TestMqttClient():
 
 
-# def test_client_connects(client):
-#     assert client.is_connected() == True
+    @pytest.fixture()
+    def client() -> MqttClient:
+        cl = MqttClient()
+        cl.connect()
+        return cl
+    
+    
+    def test_client_connects(self, client):
+        assert client.is_connected() == True

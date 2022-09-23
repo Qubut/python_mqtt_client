@@ -1,9 +1,10 @@
+import base64
 from glob import glob
-import logging
 import os.path
 from hashlib import md5
 from json import dumps, loads
-from .logger import logger
+import logging
+import sys
 """
 This is a module containing 
 the functions used by both publish.py and subscribe.py
@@ -11,31 +12,12 @@ the functions used by both publish.py and subscribe.py
 """
 
 
-
-
-def dump_json(msg: bytes) -> str:
-    """calls the function json.dumps to serialize an object
-    to a json formatted str
-
-    Args:
-        msg (bytes): the payload to be published by the MQTT client
-
-    Returns:
-        str: A json formatted string
-    """
-    return dumps(msg)
-
-
-def load_json(msg: str) -> bytes:
-    """calls the function json.loads to deserialize a json formatted string to an object
-
-    Args:
-        msg (str): the payload recieved from the publisher
-
-    Returns:
-        object: the deserialized object json fromatted payload
-    """
-    return loads(msg)
+logging.basicConfig(level=logging.DEBUG,
+                    format="%(asctime)s - %(levelname)s - %(message)s", handlers=[
+                        logging.FileHandler('./out/log.log'),
+                        logging.StreamHandler(sys.stdout)
+                    ])
+logger = logging.getLogger(__name__)
 
 
 def chunk_md5(chunk: bytes) -> str:
@@ -72,6 +54,8 @@ def check_path(path: str) -> bool:
         bool: the result for the checking the path
     """
     return os.path.exists(path)
+
+
 def get_size(fpath: str) -> int:
     """returns the size of the given file
 
@@ -85,6 +69,7 @@ def get_size(fpath: str) -> int:
         return int(os.path.getsize(fpath)/1024)
     else:
         raise FileNotFoundError
+
 
 def mk_dir(dir: str):
     """makes a dir in the given path
@@ -123,8 +108,24 @@ def generate_md5(fname) -> str:
     return hash_md5.hexdigest()
 
 
+def make_temp(od: str, data: bytes, hash: str, number: int, timeid: int, filename: str):
+    """ save data to temp file
+        and send recieved chunknumber
+    """
+    if chunk_md5(data.encode()) == hash:
+        fname = od+"/"+str(timeid)+"_"+filename+"_.temp"
+        with open(fname, "wb" if number == 0 else "ab") as f:
+            try:
+                f.write(base64.b64decode(data))
+            except Exception as e:
+                logger.error(e)
+                return False
+        logger.info(f"saved chunk {number} to {fname}")
+        return True
+
+
 def check_temp_files(od: str, filename: str, timeid: int, filehash: str):
-    """ check temp file and rename to original
+    """ checks temp files and rename to original
     """
     os.sync()
     for l in os.listdir(od):
@@ -134,4 +135,4 @@ def check_temp_files(od: str, filename: str, timeid: int, filehash: str):
                 os.rename(od+"/"+l, od+"/"+filename)
     for f in glob(od+"/*.temp"):
         os.remove(f)
-    logging.info("OK: saved file", filename)
+    logging.info(f"OK: saved file {filename}")
